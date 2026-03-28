@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@clerk/clerk-react'
 import { Users, Code2, TrendingUp, AlertTriangle, Loader2, ArrowRight } from 'lucide-react'
 import api from '../lib/api'
 
 export default function AdminDashboardPage() {
+  const { isLoaded } = useAuth()
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
   const [reviews, setReviews] = useState([])
@@ -11,6 +13,8 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!isLoaded) return;
+
     const fetchAdminData = async () => {
       try {
         setIsLoading(true)
@@ -35,7 +39,7 @@ export default function AdminDashboardPage() {
     }
 
     fetchAdminData()
-  }, [])
+  }, [isLoaded])
 
   const statCards = [
     { label: 'Total Users', value: stats?.totalUsers ?? '—', icon: Users, color: 'text-primary' },

@@ -9,8 +9,22 @@ const api = axios.create({
 
 // Attach Clerk session token to every request
 api.interceptors.request.use(async (config) => {
-  // Token will be set by the auth provider hook
-  const token = window.__clerk_token;
+  let token = null;
+  
+  // Try to get token directly from Clerk to avoid race conditions on page load
+  if (window.Clerk?.session) {
+    try {
+      token = await window.Clerk.session.getToken();
+    } catch (e) {
+      console.warn("Error fetching clerk token:", e);
+    }
+  }
+  
+  // Fallback to the token setter variable if Clerk object isn't fully ready
+  if (!token && window.__clerk_token) {
+    token = window.__clerk_token;
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
