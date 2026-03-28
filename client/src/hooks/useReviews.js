@@ -17,9 +17,10 @@ export function useReviews() {
       setError(null)
       window.__clerk_token = await getToken()
       const { data } = await api.get('/reviews')
-      setReviews(data)
+      setReviews(Array.isArray(data) ? data : [])
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch reviews')
+      setReviews([])
     } finally {
       setIsLoading(false)
     }
