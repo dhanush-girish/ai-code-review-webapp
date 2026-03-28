@@ -1,16 +1,32 @@
-const { requireAuth, getAuth } = require('@clerk/express');
+const { getAuth } = require('@clerk/express');
 
-// Middleware: require authentication
-const requireAuthentication = requireAuth();
+// Middleware: require authentication (compatible with Express 5 + Clerk v2)
+const requireAuthentication = (req, res, next) => {
+  try {
+    const auth = getAuth(req);
+    if (!auth || !auth.userId) {
+      return res.status(401).json({ error: 'Unauthorized: No valid session' });
+    }
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error.message);
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+};
 
 // Middleware: extract user info and attach to req
 const attachUser = (req, res, next) => {
-  const auth = getAuth(req);
-  if (!auth || !auth.userId) {
+  try {
+    const auth = getAuth(req);
+    if (!auth || !auth.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    req.clerkUserId = auth.userId;
+    next();
+  } catch (error) {
+    console.error('AttachUser middleware error:', error.message);
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  req.clerkUserId = auth.userId;
-  next();
 };
 
 // Middleware: require admin role (check DB)
