@@ -31,7 +31,10 @@ export default function CodeReviewPage() {
       navigate(`/review/${data.id}`)
     } catch (err) {
       console.error(err)
-      alert(err.response?.data?.error || 'An error occurred during AI analysis')
+      const errorMessage = err.response?.data?.error 
+        || err.message 
+        || 'An error occurred during AI analysis';
+      alert(`API Error: ${errorMessage}`);
     } finally {
       setIsLoading(false)
     }
